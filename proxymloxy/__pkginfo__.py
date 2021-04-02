@@ -19,6 +19,7 @@ requires = [
 	"doreah"	
 ]
 resources = [
+	"configfile.jinja"
 ]
 
 commands = {
