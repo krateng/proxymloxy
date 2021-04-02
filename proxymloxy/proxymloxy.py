@@ -7,20 +7,30 @@ from doreah.control import mainfunction
 
 
 jenv = Environment(
-    loader=PackageLoader('proxymloxy','./')
+    loader=PackageLoader('proxymloxy','.')
 )
 jtmpl = jenv.get_template("configfile.jinja")
 
 def load_yml_file(name):
-	with open(name,"r") as ymlfile:
-		info = yaml.safe_load(ymlfile)
-	return info
+	try:
+		with open(name,"r") as ymlfile:
+			info = yaml.safe_load(ymlfile)
+		return info
+	except:
+		print("Input file",name,"could not be found!")
+		return False
 
 def write_conf_file(txt,name):
 	#if not os.path.exists(name) or ask("Overwrite " + name):
 	
-	with open(name,"w") as conffile:
-		conffile.write(txt)
+	try:
+		os.makedirs(os.path.dirname(name))
+		with open(name,"w") as conffile:
+			conffile.write(txt)
+		return True
+	except:
+		print("Output file",name,"could not be written!")
+		return False
 		
 		
 def create_conf_file_new(info):
@@ -51,7 +61,11 @@ def create_conf_file_new(info):
 
 
 def translate(input,output):
-	write_conf_file(create_conf_file_new(load_yml_file(input)),output)
+	data = load_yml_file(input)
+	if data is not False:
+		result = create_conf_file_new(data)
+		return write_conf_file(result,output)
+	return False
 	
 
 def restart_nginx():
@@ -59,5 +73,4 @@ def restart_nginx():
 	
 @mainfunction({'i':'input','o':'output'},shield=True)
 def main(input="proxymloxy.yml",output="/etc/nginx/conf.d/proxymloxy.conf"):
-	translate(input,output)
-	restart_nginx()
+	if translate(input,output): restart_nginx()

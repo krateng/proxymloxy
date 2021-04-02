@@ -5,7 +5,7 @@ author = {
 	"email":"proxymloxy@dev.krateng.ch",
 	"github": "krateng"
 }
-version = 1,0,2
+version = 1,0,3
 versionstr = ".".join(str(n) for n in version)
 links = {
 	"pypi":"proxymloxy",
