@@ -23,5 +23,5 @@ resources = [
 ]
 
 commands = {
-	"proxymloxy":"proxymloxy:translate"
+	"proxymloxy":"proxymloxy:main"
 }

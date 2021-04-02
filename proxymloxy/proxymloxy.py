@@ -49,8 +49,15 @@ def create_conf_file_new(info):
 	return jtmpl.render(**info)
 	
 
-@mainfunction({'i':'input','o':'output'},shield=True)
-def translate(input="proxymloxy.yml",output="/etc/nginx/conf.d/proxymloxy.conf"):
+
+def translate(input,output):
 	write_conf_file(create_conf_file_new(load_yml_file(input)),output)
 	
 
+def restart_nginx():
+	os.system("sudo systemctl restart nginx.service")
+	
+@mainfunction({'i':'input','o':'output'},shield=True)
+def main(input="proxymloxy.yml",output="/etc/nginx/conf.d/proxymloxy.conf"):
+	translate(input,output)
+	restart_nginx()
