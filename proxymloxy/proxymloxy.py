@@ -2,12 +2,12 @@ import yaml
 import ipaddress
 from itertools import islice
 import os
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, PackageLoader
 from doreah.control import mainfunction
 
 
 jenv = Environment(
-    loader=FileSystemLoader('./')
+    loader=PackageLoader('proxymloxy','./')
 )
 jtmpl = jenv.get_template("configfile.jinja")
 
