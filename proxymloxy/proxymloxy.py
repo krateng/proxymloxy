@@ -3,6 +3,7 @@ import ipaddress
 from itertools import islice
 import os
 from jinja2 import Environment, FileSystemLoader
+from doreah.control import mainfunction
 
 
 jenv = Environment(
@@ -48,9 +49,8 @@ def create_conf_file_new(info):
 	return jtmpl.render(**info)
 	
 
-if __name__ == "__main__":
-	import sys
-	inp, outp = sys.argv[1:]
-	write_conf_file(create_conf_file_new(load_yml_file(inp)),outp)
+@mainfunction({'i':'input','o':'output'},shield=True)
+def translate(input="proxymloxy.yml",output="/etc/nginx/conf.d/proxymloxy.conf"):
+	write_conf_file(create_conf_file_new(load_yml_file(input)),output)
 	
 
