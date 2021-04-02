@@ -61,7 +61,7 @@ server {
    
    server_name {{ server.names | join(' ') }};
    location / {
-	  proxy_pass http://{{ server.ip }}:{{ server.port }};
+	  proxy_pass http{{ 's' if server.ssl else '' }}://{{ server.ip }}:{{ server.port }};
    }
 }
 

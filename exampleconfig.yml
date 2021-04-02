@@ -1,0 +1,28 @@
+network_ipv4: 192.168.178.0/24
+network_ipv6: "fd42:1337::/64"
+default_response: 418
+domains:
+- domain: mytld.ch
+  ssl_certificate: /etc/letsencrypt/live/mytld.ch/fullchain.pem
+  ssl_certificate_key: /etc/letsencrypt/live/mytld.ch/privkey.pem
+  root_response: https://duckduckgo.com
+  servers:
+  - names: [proxmox, admin]
+    host: 31
+    port: 8006
+    ipv6: false
+    ssl: true
+  - names: [nas, synology]
+    host: 128
+    port: 5000
+    ipv6: false
+    private: true
+  - names: [maloja]
+    host: 32
+    port: 42010
+    settings:
+      client_max_body_size: 1G
+  - names: [bitwarden]
+    host: 112
+    port: 80
+    private: true
