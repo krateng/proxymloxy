@@ -24,7 +24,7 @@ def write_conf_file(txt,name):
 	#if not os.path.exists(name) or ask("Overwrite " + name):
 	
 	try:
-		os.makedirs(os.path.dirname(name))
+		os.makedirs(os.path.dirname(name),exist_ok=True)
 		with open(name,"w") as conffile:
 			conffile.write(txt)
 		return True
