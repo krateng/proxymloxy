@@ -1,0 +1,70 @@
+
+
+{% for domain in domains %}
+
+#######
+### DOMAIN {{ domain.domain | upper }}
+#######
+
+
+{% if 'ssl_certificate' in domain and 'ssl_certificate_key' in domain %}
+# SSL UPGRADE
+server {
+   listen 80;
+   listen [::]:80;
+   
+   server_name *.{{ domain.domain }} {{ domain.domain }};
+
+   location / {
+	  return 301 https://$host$request_uri;
+   }
+}
+{% endif %}
+
+
+
+# ROOT DOMAIN
+server {
+   listen 443 ssl;
+   listen [::]:443 ssl;
+
+   ssl_certificate {{ domain.ssl_certificate }};
+   ssl_certificate_key {{ domain.ssl_certificate_key }};
+
+   server_name {{ domain.domain }};
+   location / {
+	  return {{ domain.root_response }};
+   }
+}
+
+
+
+
+{% for server in domain.servers %}
+
+server {
+   listen 443 ssl;
+   listen [::]:443 ssl;
+   
+   ssl_certificate {{ domain.ssl_certificate }};
+   ssl_certificate_key {{ domain.ssl_certificate_key }};
+   
+   {% if server.private %}
+    allow {{ network.v4 }};
+    allow {{ network.v6 }};
+    deny all;
+   {% endif %}
+   
+   {% for setting in server.settings %}
+   {{ setting }} {{ server.settings[setting] }};
+   {% endfor %}
+   
+   server_name {{ server.names | join(' ') }};
+   location / {
+	  proxy_pass http://{{ server.ip }}:{{ server.port }};
+   }
+}
+
+{% endfor %}
+
+{% endfor %}
