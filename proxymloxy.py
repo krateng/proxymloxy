@@ -2,12 +2,11 @@ import yaml
 import ipaddress
 from itertools import islice
 import os
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 
 
 jenv = Environment(
-    loader=FileSystemLoader('./'),
-    autoescape=select_autoescape(['html', 'xml'])
+    loader=FileSystemLoader('./')
 )
 jtmpl = jenv.get_template("configfile.jinja")
 
