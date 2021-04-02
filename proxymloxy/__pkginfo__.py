@@ -5,7 +5,7 @@ author = {
 	"email":"proxymloxy@dev.krateng.ch",
 	"github": "krateng"
 }
-version = 1,0,0
+version = 1,0,1
 versionstr = ".".join(str(n) for n in version)
 links = {
 	"pypi":"proxymloxy",
@@ -15,7 +15,7 @@ python_version = ">=3.6"
 requires = [
 	"jinja2",
 	"ipaddress",
-	"yaml",
+	"PyYAML",
 	"doreah"	
 ]
 resources = [
