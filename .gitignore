@@ -1,4 +1,5 @@
 *.sh
 *.conf
 *.yml
+*.pyc
 !exampleconfig.yml
