@@ -14,14 +14,17 @@ jenv = Environment(
 )
 jtmpl = jenv.get_template("configfile.jinja")
 
-def load_container_ip(cid):
+def load_container_ip(cid,ipv6=True):
 	print("get container ip of",cid)
 	with open(CONTAINER_CONF_FILE.format(cid=cid)) as fd:
 		lines = fd.readlines()
 	print("Loaded container {cid} configuration")
 	info = dict([entry.split('=') for entry in [l for l in lines if l.startswith('net0: ')][0].split(": ")[-1].split(",")])
 	
-	return ipaddress.IPv4Interface(info['ip']).ip, ipaddress.IPv6Interface(info['ip6']).ip
+	if ipv6:
+		return ipaddress.IPv6Interface(info['ip6']).ip
+	else:
+		ipaddress.IPv4Interface(info['ip']).ip
 
 def load_yml_file(name):
 	try:
@@ -34,7 +37,8 @@ def load_yml_file(name):
 		return False
 
 def write_conf_file(txt,name):
-	#if not os.path.exists(name) or ask("Overwrite " + name):
+	if os.path.exists(name):
+		os.replace(name,name + ".old")
 	
 	try:
 		os.makedirs(os.path.dirname(os.path.abspath(name)),exist_ok=True)
@@ -66,13 +70,13 @@ def create_conf_file_new(info):
 			
 			if server["ipv6"]:
 				if "container" in server:
-					server['ip'] = load_container_ip(server["container"])[1]
+					server['ip'] = load_container_ip(server["container"],ipv6=True)
 				else:
 					host = int(str(server["host"]),16) - 1
 					server['ip'] = "[" + str(next(islice(ipv6network.hosts(),host,None))) + "]"
 			else:
 				if "container" in server:
-					server['ip'] = load_container_ip(server["container"])[0]
+					server['ip'] = load_container_ip(server["container"],ipv6=False)
 				else:
 					host = int(server["host"]) - 1
 					server['ip'] = str(next(islice(ipv4network.hosts(),host,None)))
