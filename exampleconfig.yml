@@ -26,3 +26,6 @@ domains:
     host: 112
     port: 80
     private: true
+  - names: [webserver]
+    container: 100
+    port: 8080
