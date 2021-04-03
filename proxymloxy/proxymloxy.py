@@ -18,13 +18,13 @@ def load_container_ip(cid,ipv6=True):
 	print("get container ip of",cid)
 	with open(CONTAINER_CONF_FILE.format(cid=cid)) as fd:
 		lines = fd.readlines()
-	print("Loaded container {cid} configuration")
+	print(f"Loaded container {cid} configuration")
 	info = dict([entry.split('=') for entry in [l for l in lines if l.startswith('net0: ')][0].split(": ")[-1].split(",")])
 	
 	if ipv6:
 		return ipaddress.IPv6Interface(info['ip6']).ip
 	else:
-		ipaddress.IPv4Interface(info['ip']).ip
+		return ipaddress.IPv4Interface(info['ip']).ip
 
 def load_yml_file(name):
 	try:
@@ -38,7 +38,8 @@ def load_yml_file(name):
 
 def write_conf_file(txt,name):
 	if os.path.exists(name):
-		os.replace(name,name + ".old")
+		try: os.replace(name,name + ".old")
+		except:	print("Could not back up old config file, do you have permissions?")
 	
 	try:
 		os.makedirs(os.path.dirname(os.path.abspath(name)),exist_ok=True)
