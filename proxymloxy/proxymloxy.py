@@ -5,7 +5,8 @@ import os
 from jinja2 import Environment, PackageLoader
 from doreah.control import mainfunction
 
-DEFAULT_NGINX_CONF_FILE = "/etc/nginx/conf.d/proxymloxy.conf"
+NGINX_CONF_FILE = "/etc/nginx/conf.d/proxymloxy.conf"
+PROXYMLOXY_CONF_FILE = "./proxymloxy.yml"
 CONTAINER_CONF_FILE = "/etc/pve/lxc/{cid}.conf"
 
 
@@ -15,7 +16,6 @@ jenv = Environment(
 jtmpl = jenv.get_template("configfile.jinja")
 
 def load_container_ip(cid,ipv6=True):
-	print("get container ip of",cid)
 	with open(CONTAINER_CONF_FILE.format(cid=cid)) as fd:
 		lines = fd.readlines()
 	print(f"Loaded container {cid} configuration")
@@ -26,29 +26,29 @@ def load_container_ip(cid,ipv6=True):
 	else:
 		return ipaddress.IPv4Interface(info['ip']).ip
 
-def load_yml_file(name):
+def load_yml_file():
 	try:
-		with open(name,"r") as ymlfile:
+		with open(PROXYMLOXY_CONF_FILE,"r") as ymlfile:
 			info = yaml.safe_load(ymlfile)
 		print("Loaded configuration")
 		return info
 	except:
-		print("Input file",name,"could not be found!")
+		print("Input file",PROXYMLOXY_CONF_FILE,"could not be found!")
 		return False
 
-def write_conf_file(txt,name):
-	if os.path.exists(name):
-		try: os.replace(name,name + ".old")
+def write_conf_file(txt):
+	if os.path.exists(NGINX_CONF_FILE):
+		try: os.replace(NGINX_CONF_FILE,NGINX_CONF_FILE + ".old")
 		except:	print("Could not back up old config file, do you have permissions?")
 	
 	try:
-		os.makedirs(os.path.dirname(os.path.abspath(name)),exist_ok=True)
-		with open(name,"w") as conffile:
+		os.makedirs(os.path.dirname(os.path.abspath(NGINX_CONF_FILE)),exist_ok=True)
+		with open(NGINX_CONF_FILE,"w") as conffile:
 			conffile.write(txt)
 		print("Wrote nginx config file")
 		return True
 	except:
-		print("Output file",name,"could not be written!")
+		print("Output file",NGINX_CONF_FILE,"could not be written!")
 		return False
 		
 		
@@ -86,11 +86,11 @@ def create_conf_file_new(info):
 	
 
 
-def translate(input,output):
-	data = load_yml_file(input)
+def translate():
+	data = load_yml_file()
 	if data is not False:
 		result = create_conf_file_new(data)
-		return write_conf_file(result,output)
+		return write_conf_file(result)
 	return False
 	
 
@@ -99,6 +99,12 @@ def restart_nginx():
 	os.system("sudo systemctl restart nginx.service")
 	print("Success!")
 	
-@mainfunction({'i':'input','o':'output'},shield=True)
-def main(input="proxymloxy.yml",output=DEFAULT_NGINX_CONF_FILE):
-	if translate(input,output): restart_nginx()
+@mainfunction({'i':'inputf','o':'outputf','c':'containerc'},shield=True)
+def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINER_CONF_FILE):
+	
+	global PROXYMLOXY_CONF_FILE, NGINX_CONF_FILE, CONTAINER_CONF_FILE
+	PROXYMLOXY_CONF_FILE = inputf
+	NGINX_CONF_FILE = outputf
+	CONTAINER_CONF_FILE = containerc
+	
+	if translate(): restart_nginx()
