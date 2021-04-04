@@ -56,7 +56,13 @@ server {
    {% endif %}
    
    {% for setting in server.settings %}
+   {% if server.settings[setting] is mapping %} 
+   {% for subsetting in server.settings[setting] %}
+   {{ setting }} {{ subsetting }} {{ server.settings[setting][subsetting] }};
+   {% endfor %}
+   {% else %}
    {{ setting }} {{ server.settings[setting] }};
+   {% endif %}
    {% endfor %}
    
    server_name {{ server.names | join(' ') }};
