@@ -31,6 +31,10 @@ def load_yml_file():
 		with open(PROXYMLOXY_CONF_FILE,"r") as ymlfile:
 			info = yaml.safe_load(ymlfile)
 		print("Loaded configuration")
+		if "filepaths" in info:
+			global NGINX_CONF_FILE, CONTAINER_CONF_FILE
+			if "nginx_config_file" in info['filepaths']: NGINX_CONF_FILE = info['filepaths']['nginx_config_file']
+			if "container_conf_file_template" in info['filepaths']: CONTAINER_CONF_FILE = info['filepaths']['container_conf_file_template']
 		return info
 	except:
 		print("Input file",PROXYMLOXY_CONF_FILE,"could not be found!")

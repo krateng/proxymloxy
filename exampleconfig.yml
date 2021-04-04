@@ -1,6 +1,9 @@
 network_ipv4: 192.168.178.0/24
 network_ipv6: "fd42:1337::/64"
 default_response: 418
+filepaths:
+   nginx_config_file: ./exampleconfig.conf
+   container_conf_file_template: "./{cid}.conf"
 domains:
 - domain: mytld.ch
   ssl_certificate: /etc/letsencrypt/live/mytld.ch/fullchain.pem
