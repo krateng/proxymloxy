@@ -20,7 +20,7 @@ def load_container_ip(cid,ipv6=True):
 		lines = fd.readlines()
 	print(f"Loaded container {cid} configuration")
 	info = dict([entry.split('=') for entry in [l for l in lines if l.startswith('net0: ')][0].split(": ")[-1].split(",")])
-	
+
 	if ipv6:
 		return ipaddress.IPv6Interface(info['ip6']).ip
 	else:
@@ -44,7 +44,7 @@ def write_conf_file(txt):
 	if os.path.exists(NGINX_CONF_FILE):
 		try: os.replace(NGINX_CONF_FILE,NGINX_CONF_FILE + ".old")
 		except:	print("Could not back up old config file, do you have permissions?")
-	
+
 	try:
 		os.makedirs(os.path.dirname(os.path.abspath(NGINX_CONF_FILE)),exist_ok=True)
 		with open(NGINX_CONF_FILE,"w") as conffile:
@@ -54,25 +54,27 @@ def write_conf_file(txt):
 	except:
 		print("Output file",NGINX_CONF_FILE,"could not be written!")
 		return False
-		
-		
+
+
 def create_conf_file_new(info):
 
 	ipv4network = ipaddress.IPv4Network(info["network_ipv4"])
 	ipv6network = ipaddress.IPv6Network(info["network_ipv6"])
 	info['network'] = {'v4':str(ipv4network),'v6':str(ipv6network)}
-	
-	
+
+
 	for domain in info['domains']:
 		for server in domain['servers']:
-		
+
 			if not "ipv6" in server: server["ipv6"] = True
 			if not "settings" in server: server["settings"] = []
 			if not "private" in server: server["private"] = False
-		
+			if not "custompath" in server: server["custompath"] = ""
+			if not "port" in server: server["port"] = 80
+
 			server['names'] = [name + "." + domain['domain'] for name in server['names']]
-		
-			
+
+
 			if server["ipv6"]:
 				if "container" in server:
 					server['ip'] = load_container_ip(server["container"],ipv6=True)
@@ -85,9 +87,9 @@ def create_conf_file_new(info):
 				else:
 					host = int(server["host"]) - 1
 					server['ip'] = str(next(islice(ipv4network.hosts(),host,None)))
-				
+
 	return jtmpl.render(**info)
-	
+
 
 
 def translate():
@@ -96,19 +98,19 @@ def translate():
 		result = create_conf_file_new(data)
 		return write_conf_file(result)
 	return False
-	
+
 
 def restart_nginx():
 	print("Restarting Nginx")
 	os.system("sudo systemctl restart nginx.service")
 	print("Success!")
-	
+
 @mainfunction({'i':'inputf','o':'outputf','c':'containerc'},shield=True)
 def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINER_CONF_FILE):
-	
+
 	global PROXYMLOXY_CONF_FILE, NGINX_CONF_FILE, CONTAINER_CONF_FILE
 	PROXYMLOXY_CONF_FILE = inputf
 	NGINX_CONF_FILE = outputf
 	CONTAINER_CONF_FILE = containerc
-	
+
 	if translate(): restart_nginx()
