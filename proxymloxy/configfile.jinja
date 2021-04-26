@@ -55,6 +55,11 @@ server {
     deny all;
    {% endif %}
 
+	 {% if server.restricted %}
+    auth_basic "Restricted";
+    auth_basic_user_file {{ filepaths.auth_file }};
+   {% endif %}
+
    {% for setting in server.settings %}
    {% if server.settings[setting] is mapping %}
    {% for subsetting in server.settings[setting] %}

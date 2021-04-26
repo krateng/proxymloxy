@@ -3,4 +3,6 @@
 *.conf.old
 *.yml
 *.pyc
+*.txt
+htpassw
 !exampleconfig.yml

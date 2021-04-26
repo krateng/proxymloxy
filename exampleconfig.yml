@@ -4,6 +4,7 @@ default_response: 418
 filepaths:
    nginx_config_file: ./exampleconfig.conf
    container_conf_file_template: "./{cid}.conf"
+   auth_file: ./htpassw
 domains:
 - domain: mytld.ch
   ssl_certificate: /etc/letsencrypt/live/mytld.ch/fullchain.pem
@@ -34,6 +35,7 @@ domains:
     host: 112
     port: 80
     private: true
+    restricted: true
   - names: [webserver]
     container: 100
     port: 8080

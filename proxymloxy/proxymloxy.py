@@ -8,6 +8,7 @@ from doreah.control import mainfunction
 NGINX_CONF_FILE = "/etc/nginx/conf.d/proxymloxy.conf"
 PROXYMLOXY_CONF_FILE = "./proxymloxy.yml"
 CONTAINER_CONF_FILE = "/etc/pve/lxc/{cid}.conf"
+AUTH_FILE = "/etc/nginx/auth"
 
 
 jenv = Environment(
@@ -31,10 +32,16 @@ def load_yml_file():
 		with open(PROXYMLOXY_CONF_FILE,"r") as ymlfile:
 			info = yaml.safe_load(ymlfile)
 		print("Loaded configuration")
+		global NGINX_CONF_FILE, CONTAINER_CONF_FILE, AUTH_FILE
 		if "filepaths" in info:
-			global NGINX_CONF_FILE, CONTAINER_CONF_FILE
 			if "nginx_config_file" in info['filepaths']: NGINX_CONF_FILE = info['filepaths']['nginx_config_file']
 			if "container_conf_file_template" in info['filepaths']: CONTAINER_CONF_FILE = info['filepaths']['container_conf_file_template']
+			if "auth_file" in info['filepaths']: AUTH_FILE = info['filepaths']['auth_file']
+
+		# now write stuff back into the loaded data in case it came from a different source and we need it inside the template
+		info['filepaths']['nginx_config_file'] = NGINX_CONF_FILE
+		info['filepaths']['container_conf_file_template'] = CONTAINER_CONF_FILE
+		info['filepaths']['nginx_config_file'] = NGINX_CONF_FILE
 		return info
 	except:
 		print("Input file",PROXYMLOXY_CONF_FILE,"could not be found!")
@@ -69,6 +76,7 @@ def create_conf_file_new(info):
 			if not "ipv6" in server: server["ipv6"] = True
 			if not "settings" in server: server["settings"] = []
 			if not "private" in server: server["private"] = False
+			if not "restricted" in server: server["restricted"] = False
 			if not "custompath" in server: server["custompath"] = ""
 			if not "port" in server: server["port"] = 80
 
@@ -105,12 +113,13 @@ def restart_nginx():
 	os.system("sudo systemctl restart nginx.service")
 	print("Success!")
 
-@mainfunction({'i':'inputf','o':'outputf','c':'containerc'},shield=True)
-def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINER_CONF_FILE):
+@mainfunction({'i':'inputf','o':'outputf','c':'containerc','a':'authf'},shield=True)
+def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINER_CONF_FILE,authf=AUTH_FILE):
 
-	global PROXYMLOXY_CONF_FILE, NGINX_CONF_FILE, CONTAINER_CONF_FILE
+	global PROXYMLOXY_CONF_FILE, NGINX_CONF_FILE, CONTAINER_CONF_FILE, AUTH_FILE
 	PROXYMLOXY_CONF_FILE = inputf
 	NGINX_CONF_FILE = outputf
 	CONTAINER_CONF_FILE = containerc
+	AUTH_FILE = authf
 
 	if translate(): restart_nginx()
