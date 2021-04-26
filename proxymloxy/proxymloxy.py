@@ -41,7 +41,7 @@ def load_yml_file():
 		# now write stuff back into the loaded data in case it came from a different source and we need it inside the template
 		info['filepaths']['nginx_config_file'] = NGINX_CONF_FILE
 		info['filepaths']['container_conf_file_template'] = CONTAINER_CONF_FILE
-		info['filepaths']['nginx_config_file'] = NGINX_CONF_FILE
+		info['filepaths']['auth_file'] = AUTH_FILE
 		return info
 	except:
 		print("Input file",PROXYMLOXY_CONF_FILE,"could not be found!")
