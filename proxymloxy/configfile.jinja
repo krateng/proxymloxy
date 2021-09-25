@@ -10,14 +10,14 @@
 {% if 'ssl_certificate' in domain and 'ssl_certificate_key' in domain %}
 # SSL UPGRADE
 server {
-   listen 80;
-   listen [::]:80;
+	listen 80;
+	listen [::]:80;
 
-   server_name *.{{ domain.domain }} {{ domain.domain }};
+	server_name *.{{ domain.domain }} {{ domain.domain }};
 
-   location / {
-	  return 301 https://$host$request_uri;
-   }
+	location / {
+		return 301 https://$host$request_uri;
+	}
 }
 {% endif %}
 
@@ -25,16 +25,16 @@ server {
 
 # ROOT DOMAIN
 server {
-   listen 443 ssl;
-   listen [::]:443 ssl;
+	listen 443 ssl;
+	listen [::]:443 ssl;
 
-   ssl_certificate {{ domain.ssl_certificate }};
-   ssl_certificate_key {{ domain.ssl_certificate_key }};
+	ssl_certificate {{ domain.ssl_certificate }};
+	ssl_certificate_key {{ domain.ssl_certificate_key }};
 
-   server_name {{ domain.domain }};
-   location / {
-	  return {{ domain.root_response }};
-   }
+	server_name {{ domain.domain }};
+	location / {
+		return {{ domain.root_response }};
+	}
 }
 
 
@@ -43,37 +43,48 @@ server {
 {% for server in domain.servers %}
 
 server {
-   listen 443 ssl;
-   listen [::]:443 ssl;
+	listen 443 ssl;
+	listen [::]:443 ssl;
 
-   ssl_certificate {{ domain.ssl_certificate }};
-   ssl_certificate_key {{ domain.ssl_certificate_key }};
+	ssl_certificate {{ domain.ssl_certificate }};
+	ssl_certificate_key {{ domain.ssl_certificate_key }};
 
-   {% if server.private %}
-    allow {{ network.v4 }};
-    allow {{ network.v6 }};
-    deny all;
-   {% endif %}
+	{% if server.private %}
+	allow {{ network.v4 }};
+	allow {{ network.v6 }};
+	deny all;
+	{% endif %}
 
-	 {% if server.restricted %}
-    auth_basic "Restricted";
-    auth_basic_user_file {{ filepaths.auth_file }};
-   {% endif %}
+	{% if server.restricted %}
+	auth_basic "Restricted";
+	auth_basic_user_file {{ filepaths.auth_file }};
+	{% endif %}
 
-   {% for setting in server.settings %}
-   {% if server.settings[setting] is mapping %}
-   {% for subsetting in server.settings[setting] %}
-   {{ setting }} {{ subsetting }} {{ server.settings[setting][subsetting] }};
-   {% endfor %}
-   {% else %}
-   {{ setting }} {{ server.settings[setting] }};
-   {% endif %}
-   {% endfor %}
 
-   server_name {{ server.names | join(' ') }};
-   location / {
-	  proxy_pass http{{ 's' if server.ssl else '' }}://{{ server.ip }}:{{ server.port }}{{ server.custompath }};
-   }
+	{%- for setting in server.settings %}
+	{%- if server.settings[setting] is mapping %}
+	{%- for subsetting in server.settings[setting] %}
+	{{ setting }} {{ subsetting }} {{ server.settings[setting][subsetting] }};
+	{%- endfor %}
+	{%- else %}
+	{{ setting }} {{ server.settings[setting] }};
+	{%- endif %}
+	{%- endfor %}
+
+
+	server_name {{ server.names | join(' ') }};
+	location / {
+		proxy_pass http{{ 's' if server.ssl else '' }}://{{ server.ip }}:{{ server.port }}{{ server.custompath }};
+		{%- for setting in server.settings %}
+		{%- if server.settings[setting] is mapping %}
+		{%- for subsetting in server.settings[setting] %}
+		{{ setting }} {{ subsetting }} {{ server.settings[setting][subsetting] }};
+		{%- endfor %}
+		{%- else %}
+		{{ setting }} {{ server.settings[setting] }};
+		{%- endif %}
+		{%- endfor %}
+	}
 }
 
 {% endfor %}

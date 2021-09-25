@@ -4,6 +4,7 @@ from itertools import islice
 import os
 from jinja2 import Environment, PackageLoader
 from doreah.control import mainfunction
+import re
 
 NGINX_CONF_FILE = "/etc/nginx/conf.d/proxymloxy.conf"
 PROXYMLOXY_CONF_FILE = "./proxymloxy.yml"
@@ -12,7 +13,9 @@ AUTH_FILE = "/etc/nginx/auth"
 
 
 jenv = Environment(
-    loader=PackageLoader('proxymloxy','.')
+    loader=PackageLoader('proxymloxy','.'),
+    #trim_blocks=True
+	lstrip_blocks = True
 )
 jtmpl = jenv.get_template("configfile.jinja")
 
@@ -96,7 +99,12 @@ def create_conf_file_new(info):
 					host = int(server["host"]) - 1
 					server['ip'] = str(next(islice(ipv4network.hosts(),host,None)))
 
-	return jtmpl.render(**info)
+	outp = jtmpl.render(**info)
+
+	outp = re.sub(r'\n{3,}',r'\n\n',outp)
+
+	#outp = '\n'.join(re.split(r'\n+', outp))
+	return outp
 
 
 
