@@ -1,7 +1,6 @@
 *.sh
 *.conf
 *.conf.old
-*.yml
 *.pyc
 *.txt
 htpassw

@@ -1,0 +1,31 @@
+[project]
+name = "proxymloxy"
+version = "1.2.1"
+description = "Reverse Proxy Manager with simple YAML configuration"
+readme = "./README.md"
+requires-python = ">=3.6"
+license = { file="./LICENSE" }
+authors = [ { name="Johannes Krattenmacher", email="proxymloxy@dev.krateng.ch" } ]
+
+urls.repository = "https://github.com/krateng/proxymloxy"
+
+keywords = ["reverse-proxy", "proxmox"]
+classifiers = [
+	"Programming Language :: Python :: 3",
+	"License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+	"Operating System :: OS Independent"
+]
+
+dependencies = [
+	"jinja2",
+	"ipaddress",
+	"PyYAML",
+	"doreah"
+]
+
+[project.scripts]
+proxymloxy = "proxymloxy:main"
+
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
