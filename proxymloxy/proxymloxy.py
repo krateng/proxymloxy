@@ -68,9 +68,14 @@ def write_conf_file(txt):
 
 def create_conf_file_new(info):
 
+	# network means the entire network, i.e. machines that have access to 'private' services
+	# subnet means the subnet the actual services are IN, ie how to calculate their IPs
 	ipv4network = ipaddress.IPv4Network(info["network_ipv4"])
+	ipv4subnet = ipaddress.IPv4Network(info.get("subnet_ipv4") or info["network_ipv4"])
 	ipv6network = ipaddress.IPv6Network(info["network_ipv6"])
+	ipv6subnet = ipaddress.IPv6Network(info.get("subnet_ipv6") or info["network_ipv6"])
 	info['network'] = {'v4':str(ipv4network),'v6':str(ipv6network)}
+	info['subnet'] = {'v4':str(ipv4subnet),'v6':str(ipv6subnet)}
 
 
 	for domain in info['domains']:
@@ -91,13 +96,13 @@ def create_conf_file_new(info):
 					server['ip'] = load_container_ip(server["container"],ipv6=True)
 				else:
 					host = int(str(server["host"]),16) - 1
-					server['ip'] = "[" + str(next(islice(ipv6network.hosts(),host,None))) + "]"
+					server['ip'] = "[" + str(next(islice(ipv6subnet.hosts(),host,None))) + "]"
 			else:
 				if "container" in server:
 					server['ip'] = load_container_ip(server["container"],ipv6=False)
 				else:
 					host = int(server["host"]) - 1
-					server['ip'] = str(next(islice(ipv4network.hosts(),host,None)))
+					server['ip'] = str(next(islice(ipv4subnet.hosts(),host,None)))
 
 	outp = jtmpl.render(**info)
 
