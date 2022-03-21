@@ -1,4 +1,4 @@
-network_ipv4: 192.168.178.0/24
+network_ipv4: 192.168.0.0/16
 network_ipv6: "fd42:1337::/64"
 default_response: 418
 filepaths:

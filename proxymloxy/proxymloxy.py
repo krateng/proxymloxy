@@ -5,6 +5,7 @@ import os
 from jinja2 import Environment, PackageLoader
 from doreah.control import mainfunction
 import re
+import subprocess
 
 NGINX_CONF_FILE = "/etc/nginx/conf.d/proxymloxy.conf"
 PROXYMLOXY_CONF_FILE = "./proxymloxy.yml"
@@ -46,7 +47,7 @@ def load_yml_file():
 		info['filepaths']['container_conf_file_template'] = CONTAINER_CONF_FILE
 		info['filepaths']['auth_file'] = AUTH_FILE
 		return info
-	except:
+	except FileNotFoundError:
 		print("Input file",PROXYMLOXY_CONF_FILE,"could not be found!")
 		return False
 
@@ -123,11 +124,16 @@ def translate():
 
 def restart_nginx():
 	print("Restarting Nginx")
-	os.system("sudo systemctl restart nginx.service")
+	subprocess.run(["systemctl","restart","nginx.service"])
 	print("Success!")
 
+def run_nginx():
+	print("Running Nginx")
+	subprocess.run(["nginx","-g","daemon off;"])
+	#subprocess.run(["cat",NGINX_CONF_FILE])
+
 @mainfunction({'i':'inputf','o':'outputf','c':'containerc','a':'authf'},shield=True)
-def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINER_CONF_FILE,authf=AUTH_FILE):
+def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINER_CONF_FILE,authf=AUTH_FILE,foreground_nginx=False):
 
 	global PROXYMLOXY_CONF_FILE, NGINX_CONF_FILE, CONTAINER_CONF_FILE, AUTH_FILE
 	PROXYMLOXY_CONF_FILE = inputf
@@ -135,4 +141,6 @@ def main(inputf=PROXYMLOXY_CONF_FILE,outputf=NGINX_CONF_FILE,containerc=CONTAINE
 	CONTAINER_CONF_FILE = containerc
 	AUTH_FILE = authf
 
-	if translate(): restart_nginx()
+	if translate():
+		if foreground_nginx: run_nginx()
+		else: restart_nginx()
