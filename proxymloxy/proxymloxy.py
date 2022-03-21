@@ -95,15 +95,19 @@ def create_conf_file_new(info):
 			if server["ipv6"]:
 				if "container" in server:
 					server['ip'] = load_container_ip(server["container"],ipv6=True)
-				else:
+				elif "host" in server:
 					host = int(str(server["host"]),16) - 1
 					server['ip'] = "[" + str(next(islice(ipv6subnet.hosts(),host,None))) + "]"
+				else: # docker with port forward, same host
+					server['ip'] = "[::1]"
 			else:
 				if "container" in server:
 					server['ip'] = load_container_ip(server["container"],ipv6=False)
-				else:
+				elif "host" in server:
 					host = int(server["host"]) - 1
 					server['ip'] = str(next(islice(ipv4subnet.hosts(),host,None)))
+				else: # docker with port forward, same host
+					server['ip'] = "127.0.0.1"
 
 	outp = jtmpl.render(**info)
 
